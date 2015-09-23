@@ -1,0 +1,24 @@
+{
+  "name": "idabot",
+  "version": "1.0.0",
+  "description": "Requires creation of a tokens.js file:",
+  "main": "idabot.js",
+  "dependencies": {
+    "request": "^2.63.0",
+    "slack-client": "^1.4.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jeremyary/idabot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jeremyary/idabot/issues"
+  },
+  "homepage": "https://github.com/jeremyary/idabot#readme"
+}

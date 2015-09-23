@@ -4,17 +4,17 @@ var tokens = require('./tokens');
 
 
 // EXPORT: motd
-var motd = function () {
+var motd = function (slack) {
 
   var channels = Object.keys(slack.channels)
-  .map(function (k) { return slack.channels[k]; })
-  .filter(function (c) { return c.is_member; })
-  .map(function (c) { return c.name; });
+                .map(function (k) { return slack.channels[k]; })
+                .filter(function (c) { return c.is_member; })
+                .map(function (c) { return c.name; });
 
   var groups = Object.keys(slack.groups)
-  .map(function (k) { return slack.groups[k]; })
-  .filter(function (g) { return g.is_open && !g.is_archived; })
-  .map(function (g) { return g.name; });
+                .map(function (k) { return slack.groups[k]; })
+                .filter(function (g) { return g.is_open && !g.is_archived; })
+                .map(function (g) { return g.name; });
 
   console.log(slack.self.name + ' joining ' + slack.team.name);
 
@@ -29,30 +29,29 @@ var motd = function () {
 
 
 // EXPORT: handleMessage
-var handleMessage = function(inputMsg) {
+var handleMessage = function(slack, inputMsg) {
 
   var channel = slack.getChannelGroupOrDMByID(inputMsg.channel),
       user = slack.getUserByID(inputMsg.user),
-      command = '',
-      urls = [];
+      command = '';
 
-  if (inputMsg.type === 'message' && assist.isDirect(slack.self.id, inputMsg.text)) {
+  if (inputMsg.type === 'message' && isDirect(slack.self.id, inputMsg.text)) {
 
     command = inputMsg.text.split((inputMsg.text.indexOf(':') > -1) ? ': ' : '> ').pop();
 
     switch(command) {
 
       case 'help':
-        sendHelpReply(user.id); break;
+        sendHelpReply(user, channel); break;
 
       case 'rots':
-        sendRotsReply(user.id); break;
+        sendRotsReply(user, channel); break;
 
       case 'rain':
-        sendRainReply(user.id); break;
+        sendRainReply(user, channel); break;
 
       default:
-        channel.send(assist.makeMention(user.id) + ' ' + 'sorry, I don\'t know that command');
+        channel.send(makeMention(user.id) + ' ' + 'sorry, I don\'t know that command');
     }
   }
 };
@@ -118,17 +117,19 @@ var syncApiCalls = function(urls, channel, user, results) {
 
 
 // INTERNAL: sendHelpReply
-var sendHelpReply = function(userId) {
-  channel.send(assist.makeMention(userId) + ' ' + 'fine, I\'ll help you this one time. Here\'s what I know:
-               \nrots - fetch a summary list of LoL rotations
-               \nrain - see if Gilbert should have his windows closed today');
-}
+var sendHelpReply = function(user, channel) {
+  channel.send(makeMention(user.id) + ' fine, I\'ll help you this one time. Here\'s what I know:'
+               + '\nrots - fetch a summary list of LoL rotations'
+               + '\nrain - see if Gilbert should have his windows closed today');
+};
 
 
 // INTERNAL: sendRotsReply
-var sendRotsReply = function(userId) {
+var sendRotsReply = function(user, channel) {
 
-  channel.send(assist.makeMention(userId) + ' ' + 'Ok, one second while I look that up...');
+  var urls = [];
+
+  channel.send(makeMention(user.id) + ' ' + 'Ok, one second while I look that up...');
 
   request('https://na.api.pvp.net/api/lol/na/v1.2/champion?freeToPlay=true&api_key=' + tokens.key, function(error, response, payload) {
 
@@ -140,17 +141,19 @@ var sendRotsReply = function(userId) {
       for (var i = 0; i < champList.length; i++) {
         urls.push('https://global.api.pvp.net/api/lol/static-data/na/v1.2/champion/' + champList[i].id + '?champData=altimages,blurb,image,info,stats,tags&api_key=' + tokens.key);
       }
-      assist.syncApiCalls(urls, channel, user, []);
+      syncApiCalls(urls, channel, user, []);
 
     } else {
-      channel.send(assist.makeMention(user.id) + ' ' + 'uh oh, something went wrong hitting the API for list');
+      channel.send(makeMention(user.id) + ' ' + 'uh oh, something went wrong hitting the API for list');
     }
-  }
-}
+  });
+};
 
 
 // INTERNAL:
-var sendRainReply = function
+var sendRainReply = function(user, channel) {
+
+};
 
 
 // INTERNAL:
