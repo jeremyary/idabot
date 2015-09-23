@@ -2,9 +2,12 @@ var Slack = require('slack-client');
 var request = require('request');
 var tokens = require('./tokens');
 
+var connectTime;
 
 // EXPORT: motd
 var motd = function (slack) {
+
+  connectTime = Math.floor(Date.now() / 1000);
 
   var channels = Object.keys(slack.channels)
                 .map(function (k) { return slack.channels[k]; })
@@ -35,7 +38,7 @@ var handleMessage = function(slack, inputMsg) {
       user = slack.getUserByID(inputMsg.user),
       command = '';
 
-  if (inputMsg.type === 'message' && isDirect(slack.self.id, inputMsg.text)) {
+  if (inputMsg.type === 'message' && isDirect(slack.self.id, inputMsg.text) && Math.floor(inputMsg.ts) > connectTime) {
 
     command = inputMsg.text.split((inputMsg.text.indexOf(':') > -1) ? ': ' : '> ').pop();
 
