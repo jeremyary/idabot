@@ -1,8 +1,19 @@
 var Slack = require('slack-client');
 var request = require('request');
+var Forecast = require('forecast');
 var tokens = require('./tokens');
 
-var connectTime;
+var connectTime,
+    forecast = new Forecast({
+    service: 'forecast.io',
+    key: tokens.forecast,
+    units: 'f', // Only the first letter is parsed
+    cache: true,      // Cache API requests?
+    ttl: {            // How long to cache requests. Uses syntax from moment.js: http://momentjs.com/docs/#/durations/creating/
+      minutes: 27,
+      seconds: 45
+      }
+  });
 
 // EXPORT: motd
 var motd = function (slack) {
@@ -123,7 +134,7 @@ var syncApiCalls = function(urls, channel, user, results) {
 var sendHelpReply = function(user, channel) {
   channel.send(makeMention(user.id) + ' fine, I\'ll help you this one time. Here\'s what I know:'
                + '\nrots - fetch a summary list of LoL rotations'
-               + '\nrain - see if Gilbert should have his windows closed today');
+               + '\nrain - see if Gilbert should have his windows closed');
 };
 
 
@@ -155,6 +166,18 @@ var sendRotsReply = function(user, channel) {
 
 // INTERNAL:
 var sendRainReply = function(user, channel) {
+
+  channel.send(makeMention(user.id) + ' ' + 'Ok, brb, gotta fly up and check the skies...');
+
+  forecast.get([43.6577204, -70.2528974], function(err, weather) {
+    if(err) return console.dir(err);
+
+    channel.send(makeMention(user.id) + ', weather is '
+                 + weather.minutely.summary.charAt(0).toLowerCase() + weather.minutely.summary.slice(1) + '..'
+                 + weather.hourly.summary.charAt(0).toLowerCase() + weather.hourly.summary.slice(1) + '..'
+                 + weather.daily.summary.charAt(0).toLowerCase() + weather.daily.summary.slice(1));
+  });
+
 
 };
 

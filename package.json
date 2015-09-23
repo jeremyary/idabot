@@ -4,6 +4,7 @@
   "description": "Requires creation of a tokens.js file:",
   "main": "idabot.js",
   "dependencies": {
+    "forecast": "^0.2.1",
     "request": "^2.63.0",
     "slack-client": "^1.4.1"
   },
